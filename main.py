@@ -2,6 +2,7 @@ MENU = {
     "espresso": {
         "ingredients": {
             "water": 50,
+            "milk": 0,
             "coffee": 18,
         },
         "cost": 1.5,
@@ -31,6 +32,10 @@ resources = {
     "coffee": 100,
 }
 
+espresso_ingredients = MENU["espresso"]["ingredients"]
+latte_ingredients = MENU["latte"]["ingredients"]
+cappuccino_ingredients = MENU["cappuccino"]["ingredients"]
+
 
 def generate_report(inventory, money_collected):
     water = inventory["water"]
@@ -43,11 +48,22 @@ def generate_report(inventory, money_collected):
      Profits collected: ${money_collected}"""
 
 
-def check_inventory(inventory, ingredients):
-    espresso_resources = MENU.get("espresso", "ingredients")
-    latte_resources = MENU.get("latte", "ingredients")
-    cappuccino_resources = MENU.get("cappuccino", "ingredients"[0])
-
+def is_enough_resources(order, inventory):
+    if order == "espresso":
+        if espresso_ingredients["water"] < inventory["water"] and espresso_ingredients["coffee"] < inventory["coffee"]:
+            return True
+        else:
+            return False
+    elif order == "latte":
+        if latte_ingredients["water"] < inventory["water"] and latte_ingredients["milk"] < inventory["milk"] and latte_ingredients["coffee"] < inventory["coffee"]:
+            return True
+        else:
+            return False
+    elif order == "cappuccino":
+        if cappuccino_ingredients["water"] < inventory["water"] and cappuccino_ingredients["milk"] < inventory["milk"] and cappuccino_ingredients["coffee"] < inventory["coffee"]:
+            return True
+        else:
+            return False
 
 def calculate_money_entered():
     quarters = int(input("How many quarters do you enter?")) * 0.25
@@ -57,9 +73,16 @@ def calculate_money_entered():
     return quarters + dimes + nickels + pennies
 
 
+def subtract_ingredients(order, inventory):
+    inventory["water"] -= order["water"]
+    inventory["milk"] -= order["milk"]
+    inventory["coffee"] -= order["coffee"]
+    return
+
+
 # start of program
 print("Welcome to Jarod's Coffee Machine!")
-print(MENU.get("cappuccino", "ingredients"))
+
 machine_off = False
 while not machine_off:
     print("Our menu is: espresso, latte, and cappuccino.")
@@ -69,10 +92,16 @@ while not machine_off:
         machine_off = True
     elif order == "report":
         print(generate_report(resources, profit))
+    elif order == "espresso":
+        order = espresso_ingredients
+    elif order == "latte":
+        order = latte_ingredients
+    elif order == "cappuccino":
+        order = cappuccino_ingredients
 
-# TODO: 4. Check resources sufficient to make drink order.
-
-check_inventory(resources, )
+    if not is_enough_resources(order, resources):
+        print("Our apologies. We do not currently have enough ingredients to make your order.")
+        break
 
 # TODO: 5. Process coins
 
