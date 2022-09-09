@@ -1,40 +1,4 @@
-MENU = {
-    "espresso": {
-        "ingredients": {
-            "water": 50,
-            "milk": 0,
-            "coffee": 18,
-        },
-        "cost": 1.5,
-    },
-    "latte": {
-        "ingredients": {
-            "water": 200,
-            "milk": 150,
-            "coffee": 24,
-        },
-        "cost": 2.5,
-    },
-    "cappuccino": {
-        "ingredients": {
-            "water": 250,
-            "milk": 100,
-            "coffee": 24,
-        },
-        "cost": 3.0,
-    }
-}
-
-profit = 0
-resources = {
-    "water": 300,
-    "milk": 200,
-    "coffee": 100,
-}
-
-espresso_ingredients = MENU["espresso"]["ingredients"]
-latte_ingredients = MENU["latte"]["ingredients"]
-cappuccino_ingredients = MENU["cappuccino"]["ingredients"]
+from menu import MENU, resources, profit
 
 
 def generate_report(inventory, money_collected):
@@ -48,65 +12,61 @@ def generate_report(inventory, money_collected):
      Profits collected: ${money_collected}"""
 
 
-def is_enough_resources(order, inventory):
-    if order == "espresso":
-        if espresso_ingredients["water"] < inventory["water"] and espresso_ingredients["coffee"] < inventory["coffee"]:
-            return True
-        else:
-            return False
-    elif order == "latte":
-        if latte_ingredients["water"] < inventory["water"] and latte_ingredients["milk"] < inventory["milk"] and latte_ingredients["coffee"] < inventory["coffee"]:
-            return True
-        else:
-            return False
-    elif order == "cappuccino":
-        if cappuccino_ingredients["water"] < inventory["water"] and cappuccino_ingredients["milk"] < inventory["milk"] and cappuccino_ingredients["coffee"] < inventory["coffee"]:
-            return True
-        else:
-            return False
+def is_enough_ingredients(order, inventory):
+    return order["water"] <= inventory["water"] and order["milk"] <= inventory["milk"] and order["coffee"] <= inventory[
+        "coffee"]
+
 
 def calculate_money_entered():
-    quarters = int(input("How many quarters do you enter?")) * 0.25
-    dimes = int(input("How many dimes?")) * 0.10
-    nickels = int(input("How many nickels?")) * 0.05
-    pennies = int(input("How many pennies?")) * 0.01
+    quarters = int(input("How many quarters do you enter? ")) * 0.25
+    dimes = int(input("How many dimes? ")) * 0.10
+    nickels = int(input("How many nickels? ")) * 0.05
+    pennies = int(input("How many pennies? \n")) * 0.01
     return quarters + dimes + nickels + pennies
 
 
-def subtract_ingredients(order, inventory):
+def is_enough_money(money_received, drink_price):
+    if money_received >= drink_price:
+        if money_received > drink_price:
+            change = round(money_received - drink_price, 2)
+            print(f"Here is your change: ${change}\n")
+        return True
+    else:
+        print(f"Sorry you didn't enter enough money. Here is your refund of ${money_received}\n")
+        return False
+
+
+def subtract_ingredients_used(order, inventory):
     inventory["water"] -= order["water"]
     inventory["milk"] -= order["milk"]
     inventory["coffee"] -= order["coffee"]
-    return
 
 
 # start of program
-print("Welcome to Jarod's Coffee Machine!")
+print("Welcome to 'Jarod's' Coffee Machine!")
 
 machine_off = False
 while not machine_off:
-    print("Our menu is: espresso, latte, and cappuccino.")
-    order = input("What would you like from our menu?").lower()
+    print("Our menu is: espresso, latte, and cappuccino.\n")
+    order = input("What would you like from our menu? ").lower()
+    drink = order  # only used this to easily name the drink in an f string later
 
     if order == "off":
         machine_off = True
+        print("Coffee machine shutting down. Goodbye.")
     elif order == "report":
         print(generate_report(resources, profit))
-    elif order == "espresso":
-        order = espresso_ingredients
-    elif order == "latte":
-        order = latte_ingredients
-    elif order == "cappuccino":
-        order = cappuccino_ingredients
+    else:
+        order = MENU[order]
 
-    if not is_enough_resources(order, resources):
-        print("Our apologies. We do not currently have enough ingredients to make your order.")
-        break
+        if not is_enough_ingredients(order["ingredients"], resources):
+            print("Our apologies; We do not currently have enough ingredients to make your order. Please try a "
+                  "different item. \n")
+        else:
+            print("Please enter coins to pay for your drink.")
+            money_received = calculate_money_entered()
 
-# TODO: 5. Process coins
-
-
-# TODO: 6. Check if transaction was successful. If user put enough money in and give them change back.
-
-
-# TODO: 7. Make coffee and deduct resources used.
+            if is_enough_money(money_received, order["cost"]):
+                profit += order["cost"]
+                print(f"Here is your {drink}. Please enjoy!\n")
+                subtract_ingredients_used(order["ingredients"], resources)
