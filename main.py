@@ -1,7 +1,7 @@
 from menu import MENU, resources, profit
 
 
-def generate_report(inventory, money_collected):
+def generate_report(inventory, profit):
     water = inventory["water"]
     milk = inventory["milk"]
     coffee = inventory["coffee"]
@@ -9,7 +9,7 @@ def generate_report(inventory, money_collected):
      Water: {water}ml
      Milk: {milk}ml
      Coffee: {coffee}g\n
-     Profits collected: ${money_collected}"""
+     Profits collected: ${profit}"""
 
 
 def is_enough_ingredients(order, inventory):
@@ -21,18 +21,18 @@ def calculate_money_entered():
     quarters = int(input("How many quarters do you enter? ")) * 0.25
     dimes = int(input("How many dimes? ")) * 0.10
     nickels = int(input("How many nickels? ")) * 0.05
-    pennies = int(input("How many pennies? \n")) * 0.01
+    pennies = int(input("How many pennies? ")) * 0.01
     return quarters + dimes + nickels + pennies
 
 
-def is_enough_money(money_received, drink_price):
-    if money_received >= drink_price:
-        if money_received > drink_price:
-            change = round(money_received - drink_price, 2)
+def is_enough_money(money_entered, drink_price):
+    if money_entered >= drink_price:
+        if money_entered > drink_price:
+            change = round(money_entered - drink_price, 2)
             print(f"Here is your change: ${change}\n")
         return True
     else:
-        print(f"Sorry you didn't enter enough money. Here is your refund of ${money_received}\n")
+        print(f"Sorry you didn't enter enough money. Here is your refund of ${money_entered}\n")
         return False
 
 
@@ -64,9 +64,9 @@ while not machine_off:
                   "different item. \n")
         else:
             print("Please enter coins to pay for your drink.")
-            money_received = calculate_money_entered()
+            money_entered = calculate_money_entered()
 
-            if is_enough_money(money_received, order["cost"]):
+            if is_enough_money(money_entered, order["cost"]):
                 profit += order["cost"]
                 print(f"Here is your {drink}. Please enjoy!\n")
                 subtract_ingredients_used(order["ingredients"], resources)
